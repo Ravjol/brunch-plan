@@ -6,31 +6,54 @@
 <title>Top Secret Brunch Mission 🥞</title>
 <style>
   *{box-sizing:border-box}
-  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
-       font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(135deg,#ffecd2,#fcb69f);color:#2d2d2d;padding:16px}
-  .card{background:#fff;max-width:440px;width:100%;border-radius:20px;padding:28px;box-shadow:0 10px 40px rgba(0,0,0,.15);text-align:center}
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;
+       font-family:system-ui,-apple-system,sans-serif;color:#2d2d2d;padding:16px;
+       background:linear-gradient(-45deg,#ffecd2,#fcb69f,#a1ffce,#faffd1);background-size:400% 400%;animation:bg 12s ease infinite}
+  @keyframes bg{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+  .floaty{position:fixed;font-size:2rem;opacity:.35;pointer-events:none;animation:float linear infinite;z-index:0}
+  @keyframes float{from{transform:translateY(110vh) rotate(0)}to{transform:translateY(-20vh) rotate(360deg)}}
+  .card{position:relative;z-index:1;background:#fff;max-width:440px;width:100%;border-radius:22px;padding:26px;
+        box-shadow:0 10px 40px rgba(0,0,0,.18);text-align:center;animation:pop .5s}
+  @keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
   h1{margin:0 0 8px;font-size:1.6rem}
   p{line-height:1.5}
-  input{width:100%;padding:14px;font-size:1.1rem;border:2px solid #fcb69f;border-radius:12px;margin:12px 0;text-align:center}
-  button{width:100%;padding:14px;font-size:1.05rem;border:0;border-radius:12px;background:#ff6b6b;color:#fff;cursor:pointer;margin-top:8px;font-weight:600}
-  button:active{transform:scale(.97)}
+  input{width:100%;padding:14px;font-size:1.1rem;border:2px solid #fcb69f;border-radius:12px;margin:12px 0;text-align:center;outline:none;transition:.2s}
+  input:focus{border-color:#ff6b6b;transform:scale(1.03)}
+  button{width:100%;padding:14px;font-size:1.05rem;border:0;border-radius:12px;background:#ff6b6b;color:#fff;cursor:pointer;margin-top:8px;font-weight:600;transition:.15s}
+  button:hover{transform:translateY(-2px) rotate(-1deg);box-shadow:0 6px 14px rgba(0,0,0,.15)}
+  button:active{transform:scale(.95)}
   .opt{background:#fff4ec;color:#2d2d2d;border:2px solid #fcb69f;text-align:left}
+  .opt:hover{background:#ffe0cc}
+  .green{background:#27ae60;color:#fff;border-color:#1e8449}
   .msg{min-height:1.5em;color:#d63031;font-weight:600}
   .hidden{display:none}
-  .timer{background:#2d3436;color:#ffeaa7;border-radius:12px;padding:10px;font-family:monospace;font-size:1.05rem;margin:12px 0}
+  .timer{background:#1e8449;color:#fff;border-radius:12px;padding:10px;font-family:monospace;font-size:1.05rem;margin:12px 0}
   .shake{animation:shake .4s}
-  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
-  .big{font-size:3rem}
+  @keyframes shake{25%{transform:translateX(-10px) rotate(-2deg)}75%{transform:translateX(10px) rotate(2deg)}}
+  .big{font-size:3rem;display:inline-block;animation:bounce 1.4s infinite}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .stamp{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%) rotate(-15deg) scale(3);opacity:0;
+         border:5px solid #27ae60;color:#27ae60;font-size:2rem;font-weight:900;padding:6px 16px;border-radius:10px;background:#fff;
+         pointer-events:none;transition:.35s cubic-bezier(.2,2,.4,1)}
+  .stamp.on{transform:translate(-50%,-50%) rotate(-15deg) scale(1);opacity:1}
+  .track{position:relative;height:48px;background:repeating-linear-gradient(90deg,#999 0 6px,transparent 6px 18px);
+         background-size:100% 4px;background-repeat:repeat-x;background-position:center;margin:16px 0}
+  .tile{position:absolute;right:0;top:4px;width:40px;height:40px;background:#27ae60;border-radius:6px;box-shadow:0 0 12px #2ecc71}
+  .runner{position:absolute;left:0;top:2px;font-size:2rem;transition:left 2.5s ease-in-out;transform:scaleX(-1)}
+  #runaway{background:#636e72;position:relative}
+  .burst{position:fixed;font-size:1.6rem;pointer-events:none;z-index:9;animation:fly 1.4s ease-out forwards}
+  @keyframes fly{to{transform:translate(var(--x),var(--y)) rotate(720deg);opacity:0}}
 </style>
 </head>
 <body>
-<div class="card">
+<div class="card" id="card">
+  <div class="stamp" id="stamp">APPROVED ✅</div>
 
-  <!-- Step 1: the gate -->
+  <!-- Step 1: gate -->
   <div id="gate">
     <div class="big">🛂</div>
     <h1>Passport Control</h1>
-    <p>Classified brunch info ahead.<br>To prove it's really you, enter <b>a country starting with "A"</b>.<br><small>(you know why 😏)</small></p>
+    <p>Classified brunch info ahead.<br>Prove it's really you: enter <b>a country starting with "A"</b>.<br><small>(you know why 😏)</small></p>
     <input id="country" placeholder="Type a country..." autocomplete="off">
     <button onclick="check()">Let me in 🚪</button>
     <p class="msg" id="msg"></p>
@@ -40,13 +63,14 @@
   <div id="choices" class="hidden">
     <div class="big">🥞🚆</div>
     <h1>Welcome back, legend.</h1>
-    <p>Mission: brunch, then catch the <b>3:15 PM train from Delhi Cantt</b> without running down the platform like a Bollywood climax.</p>
+    <p>Mission: brunch, then reach the <b>🟩 Green Tile</b> before the <b>3:15 PM</b> train. No Bollywood-style platform sprints.</p>
     <div class="timer" id="timer"></div>
     <button class="opt" onclick="pick('CP')">🏛️ CP (Connaught Place)</button>
     <button class="opt" onclick="pick('YM')">🍻 Yes Minister</button>
     <button class="opt" onclick="pick('AERO')">✈️ Aerocity</button>
     <button class="opt" onclick="pick('RG')">🛍️ Rajouri Garden</button>
-    <button class="opt" onclick="pick('STN')">🍛 Just eat at the station</button>
+    <button class="opt green" onclick="pick('GT')">🟩 Straight to the Green Tile</button>
+    <button id="runaway">😴 Skip the train, sleep in</button>
   </div>
 
   <!-- Step 3: verdict -->
@@ -54,70 +78,115 @@
     <div class="big" id="vEmoji"></div>
     <h1 id="vTitle"></h1>
     <p id="vText"></p>
+    <div class="track"><span class="runner" id="runner">🏃</span><span class="tile"></span></div>
+    <p id="vArrive" style="font-weight:600"></p>
     <button onclick="lock()">Lock it in 🔒 (send on WhatsApp)</button>
     <button class="opt" style="text-align:center" onclick="back()">Nah, let me rethink 🤔</button>
   </div>
-
 </div>
 
 <script>
-const A_COUNTRIES = ["afghanistan","albania","algeria","andorra","angola","antigua and barbuda","antigua",
-  "argentina","armenia","australia","austria","azerbaijan"];
+const $ = id => document.getElementById(id);
 
+// floating background emojis
+const fl = ["🥞","🍳","☕","🚆","🟩","🥐","🧇","🍹"];
+for (let i = 0; i < 14; i++) {
+  const s = document.createElement('span');
+  s.className = 'floaty'; s.textContent = fl[i % fl.length];
+  s.style.left = Math.random()*100 + 'vw';
+  s.style.animationDuration = 8 + Math.random()*10 + 's';
+  s.style.animationDelay = -Math.random()*15 + 's';
+  document.body.appendChild(s);
+}
+
+function burst(emojis, n = 30) {
+  for (let i = 0; i < n; i++) {
+    const b = document.createElement('span');
+    b.className = 'burst'; b.textContent = emojis[i % emojis.length];
+    b.style.left = '50vw'; b.style.top = '45vh';
+    b.style.setProperty('--x', (Math.random()-.5)*120 + 'vw');
+    b.style.setProperty('--y', (Math.random()-.5)*120 + 'vh');
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), 1500);
+  }
+}
+function shake() { const c = $('card'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake'); }
+
+// Step 1
+const A = ["afghanistan","albania","algeria","andorra","angola","antigua and barbuda","antigua",
+  "argentina","armenia","australia","austria","azerbaijan"];
 const roasts = [
   "❌ Wrong. Immigration officer is disappointed.",
   "❌ That doesn't even start with A, bro 😭",
   "❌ Visa rejected. Try again, geography topper.",
   "❌ Bhai… A. The letter A. First letter of the alphabet.",
-  "❌ Your passport has been confiscated. Just kidding, try again."
+  "❌ Passport confiscated. Just kidding, try again."
 ];
 let tries = 0;
-
-function check(){
-  const v = document.getElementById('country').value.trim().toLowerCase();
-  const msg = document.getElementById('msg');
-  if (A_COUNTRIES.includes(v)){
-    document.getElementById('gate').classList.add('hidden');
-    document.getElementById('choices').classList.remove('hidden');
+function check() {
+  const v = $('country').value.trim().toLowerCase();
+  if (A.includes(v)) {
+    $('msg').textContent = '';
+    $('stamp').classList.add('on');
+    burst(["🎉","✨","🥳","🟩"]);
+    setTimeout(() => { $('stamp').classList.remove('on'); $('gate').classList.add('hidden'); $('choices').classList.remove('hidden'); }, 1200);
     return;
   }
-  if (v.startsWith('a')) msg.textContent = "🤨 Starts with A but that's not a country. Nice try.";
-  else msg.textContent = roasts[tries++ % roasts.length];
-  const card = document.querySelector('.card');
-  card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+  $('msg').textContent = v.startsWith('a') ? "🤨 Starts with A but that's not a country. Nice try." : roasts[tries++ % roasts.length];
+  shake();
 }
-document.getElementById('country').addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+$('country').addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
 
+// runaway button
+const rb = $('runaway'); let dodges = 0;
+const dodgeMsgs = ["😴 Skip the train, sleep in", "Nope 🙅", "Not an option 😤", "Green Tile is calling 🟩", "Stop trying 😂", "Train > sleep"];
+function dodge(e) {
+  e.preventDefault();
+  dodges++;
+  rb.style.transform = `translate(${(Math.random()-.5)*220}px, ${(Math.random()-.5)*120}px) rotate(${(Math.random()-.5)*40}deg)`;
+  rb.textContent = dodgeMsgs[dodges % dodgeMsgs.length];
+}
+rb.addEventListener('mouseenter', dodge);
+rb.addEventListener('touchstart', dodge);
+rb.addEventListener('click', dodge);
+
+// Step 2/3
 const places = {
-  CP:   {e:"🏛️", t:"CP it is!", x:"Classic. Great cafés, great vibes… and roughly 45–60 min to Delhi Cantt in traffic. Leave by 2:00 PM sharp or you'll be waving at the train from the auto."},
-  YM:   {e:"🍻", t:"Yes Minister!", x:"Bold choice, Minister. Reminder: the train does not wait for 'one last round'. Out the door by 2:15 PM."},
-  AERO: {e:"✈️", t:"Aerocity!", x:"The smart pick — fancy brunch spots and only ~20 min from Delhi Cantt. You can even order dessert. Leave by 2:30 PM."},
-  RG:   {e:"🛍️", t:"Rajouri Garden!", x:"Food heaven and pretty close to Delhi Cantt (~25 min). Do NOT get distracted by shopping. Leave by 2:30 PM."},
-  STN:  {e:"🍛", t:"Station food?!", x:"Zero risk of missing the train. Maximum risk of regret. Respect for the commitment though 🫡"}
+  CP:   {e:"🏛️", t:"CP it is!", leave:"2:00 PM", x:"Classic. Great cafés, great vibes… and roughly 45–60 min to the Green Tile in traffic."},
+  YM:   {e:"🍻", t:"Yes Minister!", leave:"2:15 PM", x:"Bold choice, Minister. The train does not wait for 'one last round'."},
+  AERO: {e:"✈️", t:"Aerocity!", leave:"2:30 PM", x:"The smart pick: fancy brunch and only ~20 min from the Green Tile. Dessert is allowed."},
+  RG:   {e:"🛍️", t:"Rajouri Garden!", leave:"2:30 PM", x:"Food heaven, ~25 min from the Green Tile. Do NOT get distracted by shopping."},
+  GT:   {e:"🟩", t:"Green Tile, straight up!", leave:"whenever 😎", x:"Zero risk of missing the train. Maximum risk of station-food regret. Respect the commitment 🫡"}
 };
 let chosen = null;
-
-function pick(k){
+function pick(k) {
   chosen = k; const p = places[k];
-  vEmoji.textContent = p.e; vTitle.textContent = p.t; vText.textContent = p.x;
-  choices.classList.add('hidden'); verdict.classList.remove('hidden');
+  $('vEmoji').textContent = p.e; $('vTitle').textContent = p.t; $('vText').textContent = p.x;
+  $('vArrive').textContent = '';
+  $('choices').classList.add('hidden'); $('verdict').classList.remove('hidden');
+  const r = $('runner'); r.style.transition = 'none'; r.style.left = '0';
+  setTimeout(() => {
+    r.style.transition = 'left 2.5s ease-in-out'; r.style.left = 'calc(100% - 44px)';
+  }, 100);
+  setTimeout(() => { $('vArrive').textContent = `🟩 Reached the Green Tile! Leave by ${p.leave}.`; burst(["🟩","🚆","🎉"], 20); }, 2700);
 }
-function back(){ verdict.classList.add('hidden'); choices.classList.remove('hidden'); }
-function lock(){
-  const text = `Brunch decision 🥞: ${places[chosen].t} ${places[chosen].e} — and we're catching the 3:15 PM train from Delhi Cantt. No excuses.`;
-  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+function back() { $('verdict').classList.add('hidden'); $('choices').classList.remove('hidden'); }
+function lock() {
+  burst(["🥞","🎉","🟩","🚆","🥳"], 40);
+  const p = places[chosen];
+  const text = `Brunch decision 🥞: ${p.t} ${p.e}\nLeaving by ${p.leave}, meeting at the 🟩 Green Tile for the 3:15 PM train. No excuses.`;
+  setTimeout(() => window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank'), 700);
 }
 
-// countdown to 3:15 PM IST today
-function tick(){
+// countdown to 3:15 PM IST
+function tick() {
   const now = new Date();
   const ist = new Date(now.getTime() + (now.getTimezoneOffset() + 330) * 60000);
-  const target = new Date(ist); target.setHours(15,15,0,0);
-  let d = Math.floor((target - ist) / 1000);
-  const el = document.getElementById('timer');
-  if (d <= 0) { el.textContent = "🚆 Train has left. Hope you're on it."; return; }
+  const target = new Date(ist); target.setHours(15, 15, 0, 0);
+  const d = Math.floor((target - ist) / 1000);
+  if (d <= 0) { $('timer').textContent = "🚆 Train has left. Hope you're on it."; return; }
   const h = Math.floor(d/3600), m = Math.floor(d%3600/60), s = d%60;
-  el.textContent = `🚆 Train in ${h}h ${m}m ${s}s`;
+  $('timer').textContent = `🟩 Reach the Green Tile in ${h}h ${m}m ${s}s`;
 }
 tick(); setInterval(tick, 1000);
 </script>
