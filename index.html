@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Top Secret Brunch Mission 🥞</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+       font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(135deg,#ffecd2,#fcb69f);color:#2d2d2d;padding:16px}
+  .card{background:#fff;max-width:440px;width:100%;border-radius:20px;padding:28px;box-shadow:0 10px 40px rgba(0,0,0,.15);text-align:center}
+  h1{margin:0 0 8px;font-size:1.6rem}
+  p{line-height:1.5}
+  input{width:100%;padding:14px;font-size:1.1rem;border:2px solid #fcb69f;border-radius:12px;margin:12px 0;text-align:center}
+  button{width:100%;padding:14px;font-size:1.05rem;border:0;border-radius:12px;background:#ff6b6b;color:#fff;cursor:pointer;margin-top:8px;font-weight:600}
+  button:active{transform:scale(.97)}
+  .opt{background:#fff4ec;color:#2d2d2d;border:2px solid #fcb69f;text-align:left}
+  .msg{min-height:1.5em;color:#d63031;font-weight:600}
+  .hidden{display:none}
+  .timer{background:#2d3436;color:#ffeaa7;border-radius:12px;padding:10px;font-family:monospace;font-size:1.05rem;margin:12px 0}
+  .shake{animation:shake .4s}
+  @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  .big{font-size:3rem}
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- Step 1: the gate -->
+  <div id="gate">
+    <div class="big">🛂</div>
+    <h1>Passport Control</h1>
+    <p>Classified brunch info ahead.<br>To prove it's really you, enter <b>a country starting with "A"</b>.<br><small>(you know why 😏)</small></p>
+    <input id="country" placeholder="Type a country..." autocomplete="off">
+    <button onclick="check()">Let me in 🚪</button>
+    <p class="msg" id="msg"></p>
+  </div>
+
+  <!-- Step 2: choices -->
+  <div id="choices" class="hidden">
+    <div class="big">🥞🚆</div>
+    <h1>Welcome back, legend.</h1>
+    <p>Mission: brunch, then catch the <b>3:15 PM train from Delhi Cantt</b> without running down the platform like a Bollywood climax.</p>
+    <div class="timer" id="timer"></div>
+    <button class="opt" onclick="pick('CP')">🏛️ CP (Connaught Place)</button>
+    <button class="opt" onclick="pick('YM')">🍻 Yes Minister</button>
+    <button class="opt" onclick="pick('AERO')">✈️ Aerocity</button>
+    <button class="opt" onclick="pick('RG')">🛍️ Rajouri Garden</button>
+    <button class="opt" onclick="pick('STN')">🍛 Just eat at the station</button>
+  </div>
+
+  <!-- Step 3: verdict -->
+  <div id="verdict" class="hidden">
+    <div class="big" id="vEmoji"></div>
+    <h1 id="vTitle"></h1>
+    <p id="vText"></p>
+    <button onclick="lock()">Lock it in 🔒 (send on WhatsApp)</button>
+    <button class="opt" style="text-align:center" onclick="back()">Nah, let me rethink 🤔</button>
+  </div>
+
+</div>
+
+<script>
+const A_COUNTRIES = ["afghanistan","albania","algeria","andorra","angola","antigua and barbuda","antigua",
+  "argentina","armenia","australia","austria","azerbaijan"];
+
+const roasts = [
+  "❌ Wrong. Immigration officer is disappointed.",
+  "❌ That doesn't even start with A, bro 😭",
+  "❌ Visa rejected. Try again, geography topper.",
+  "❌ Bhai… A. The letter A. First letter of the alphabet.",
+  "❌ Your passport has been confiscated. Just kidding, try again."
+];
+let tries = 0;
+
+function check(){
+  const v = document.getElementById('country').value.trim().toLowerCase();
+  const msg = document.getElementById('msg');
+  if (A_COUNTRIES.includes(v)){
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('choices').classList.remove('hidden');
+    return;
+  }
+  if (v.startsWith('a')) msg.textContent = "🤨 Starts with A but that's not a country. Nice try.";
+  else msg.textContent = roasts[tries++ % roasts.length];
+  const card = document.querySelector('.card');
+  card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+}
+document.getElementById('country').addEventListener('keydown', e => { if (e.key === 'Enter') check(); });
+
+const places = {
+  CP:   {e:"🏛️", t:"CP it is!", x:"Classic. Great cafés, great vibes… and roughly 45–60 min to Delhi Cantt in traffic. Leave by 2:00 PM sharp or you'll be waving at the train from the auto."},
+  YM:   {e:"🍻", t:"Yes Minister!", x:"Bold choice, Minister. Reminder: the train does not wait for 'one last round'. Out the door by 2:15 PM."},
+  AERO: {e:"✈️", t:"Aerocity!", x:"The smart pick — fancy brunch spots and only ~20 min from Delhi Cantt. You can even order dessert. Leave by 2:30 PM."},
+  RG:   {e:"🛍️", t:"Rajouri Garden!", x:"Food heaven and pretty close to Delhi Cantt (~25 min). Do NOT get distracted by shopping. Leave by 2:30 PM."},
+  STN:  {e:"🍛", t:"Station food?!", x:"Zero risk of missing the train. Maximum risk of regret. Respect for the commitment though 🫡"}
+};
+let chosen = null;
+
+function pick(k){
+  chosen = k; const p = places[k];
+  vEmoji.textContent = p.e; vTitle.textContent = p.t; vText.textContent = p.x;
+  choices.classList.add('hidden'); verdict.classList.remove('hidden');
+}
+function back(){ verdict.classList.add('hidden'); choices.classList.remove('hidden'); }
+function lock(){
+  const text = `Brunch decision 🥞: ${places[chosen].t} ${places[chosen].e} — and we're catching the 3:15 PM train from Delhi Cantt. No excuses.`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+// countdown to 3:15 PM IST today
+function tick(){
+  const now = new Date();
+  const ist = new Date(now.getTime() + (now.getTimezoneOffset() + 330) * 60000);
+  const target = new Date(ist); target.setHours(15,15,0,0);
+  let d = Math.floor((target - ist) / 1000);
+  const el = document.getElementById('timer');
+  if (d <= 0) { el.textContent = "🚆 Train has left. Hope you're on it."; return; }
+  const h = Math.floor(d/3600), m = Math.floor(d%3600/60), s = d%60;
+  el.textContent = `🚆 Train in ${h}h ${m}m ${s}s`;
+}
+tick(); setInterval(tick, 1000);
+</script>
+</body>
+</html>
